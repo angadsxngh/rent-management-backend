@@ -29,6 +29,7 @@ model Tenant {
   name       String
   email      String    @unique
   phone      String
+  password   String
   rentDue    Float
   property   Property? @relation(fields: [propertyId], references: [id])
   propertyId String?   @unique
