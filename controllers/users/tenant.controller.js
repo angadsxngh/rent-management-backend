@@ -16,14 +16,14 @@ const options = {
   secure: true,
 };
 
-const registerOwner = asyncHandler(async (req, res) => {
+const registerTenant = asyncHandler(async (req, res) => {
   const { name, email, phone, password } = req.body;
 
   if ([name, email, phone, password].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
-  const existedUser = await prisma.owner.findUnique({
+  const existedUser = await prisma.tenant.findUnique({
     where: {
       email: email,
     },
@@ -35,7 +35,7 @@ const registerOwner = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await prisma.owner.create({
+  const user = await prisma.tenant.create({
     data: {
       name: name,
       email: email,
@@ -47,7 +47,7 @@ const registerOwner = asyncHandler(async (req, res) => {
   const accessToken = await generateAccessToken(user);
   const refreshToken = await generateRefreshToken(user);
 
-  const createdUser = await prisma.owner.findUnique({
+  const createdUser = await prisma.tenant.findUnique({
     where: {
       email: email,
     },
@@ -63,7 +63,7 @@ const registerOwner = asyncHandler(async (req, res) => {
     .json("user created succesfully");
 });
 
-const loginOwner = asyncHandler(async (req, res) => {
+const loginTenant = asyncHandler(async (req, res) => {
   const { email, phone, password } = req.body;
 
   if (!(email || phone)) {
@@ -97,7 +97,7 @@ const loginOwner = asyncHandler(async (req, res) => {
 
 //secured controllers
 
-const logoutOwner = asyncHandler(async (req, res) => {
+const logoutTenant = asyncHandler(async (req, res) => {
   res.clearCookie("accessToken", options)
   res.clearCookie("refreshToken", options)
 
@@ -106,11 +106,11 @@ const logoutOwner = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out!"))
 })
 
-const deleteOwner = asyncHandler(async (req, res) => {
+const deleteTenant = asyncHandler(async (req, res) => {
 
   const { password } = req.body;
 
-  const user = await prisma.owner.findFirst({
+  const user = await prisma.tenant.findFirst({
     where: {
       id: req.user.id
     }
@@ -128,11 +128,11 @@ const deleteOwner = asyncHandler(async (req, res) => {
 
   await prisma.property.deleteMany({
     where: {
-      ownerId: req.user.id
+      tenantId: req.user.id
     }
   })
 
-  await prisma.owner.delete({
+  await prisma.tenant.delete({
     where: {
       id: req.user.id
     }
@@ -145,8 +145,8 @@ const deleteOwner = asyncHandler(async (req, res) => {
 })
 
 export {
-  registerOwner,
-  loginOwner,
-  logoutOwner,
-  deleteOwner
-};
+    registerTenant,
+    loginTenant,
+    logoutTenant,
+    deleteTenant
+}

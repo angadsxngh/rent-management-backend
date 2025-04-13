@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const findOwnerByEmailOrPhone = async (email, phone) => {
+const findUserByEmailOrPhone = async (email, phone) => {
   return await prisma.owner.findFirst({
     where: {
       OR: [{ email: email }, { phone: phone }],
@@ -37,4 +37,4 @@ const generateRefreshToken = async (user) => {
   );
 };
 
-export { generateAccessToken, generateRefreshToken, findOwnerByEmailOrPhone };
+export { generateAccessToken, generateRefreshToken, findUserByEmailOrPhone };
