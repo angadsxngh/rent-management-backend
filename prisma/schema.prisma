@@ -39,7 +39,11 @@ model Tenant {
 model Property {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   address    String
+  city       String
+  country    String
   rentAmount Float
+  imageUrl   String
+  size       Int
   owner      Owner    @relation(fields: [ownerId], references: [id])
   ownerId    String
   tenant     Tenant?

@@ -96,17 +96,58 @@ const loginOwner = asyncHandler(async (req, res) => {
     .json("User logged in successfully");
 });
 
-const logoutOwner = asyncHandler(async(req, res) => {
-    res.clearCookie("accessToken", options)
-    res.clearCookie("refreshToken", options)
+//secured controllers
 
-    return res
+const logoutOwner = asyncHandler(async (req, res) => {
+  res.clearCookie("accessToken", options)
+  res.clearCookie("refreshToken", options)
+
+  return res
     .status(200)
     .json(new ApiResponse(200, {}, "User logged out!"))
 })
 
-export { 
-    registerOwner, 
-    loginOwner,
-    logoutOwner
+const deleteOwner = asyncHandler(async (req, res) => {
+
+  const { password } = req.body;
+
+  const user = await prisma.owner.findFirst({
+    where: {
+      id: req.user.id
+    }
+  })
+
+  if (!password) {
+    throw new ApiError(400, "password field cannot be empty")
+  }
+
+  const isPasswordValid = bcrypt.compare(password, user.password)
+
+  if (!isPasswordValid) {
+    throw new ApiError(400, "invalid password")
+  }
+
+  await prisma.property.deleteMany({
+    where: {
+      ownerId: req.user.id
+    }
+  })
+
+  await prisma.owner.delete({
+    where: {
+      id: req.user.id
+    }
+  })
+
+  res
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json("Account deleted succesfully")
+})
+
+export {
+  registerOwner,
+  loginOwner,
+  logoutOwner,
+  deleteOwner
 };
