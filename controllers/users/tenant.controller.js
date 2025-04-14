@@ -7,13 +7,15 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../services/user.services.js";
-import { findUserByEmailOrPhone } from "../../services/user.services.js";
+import { findTenantByEmailOrPhone } from "../../services/user.services.js";
 
 const prisma = new PrismaClient();
 
 const options = {
   httpOnly: true,
-  secure: true,
+    secure: true,
+    sameSite: 'None',
+    path: '/'
 };
 
 const registerTenant = asyncHandler(async (req, res) => {
@@ -57,10 +59,13 @@ const registerTenant = asyncHandler(async (req, res) => {
     throw new ApiError(400, "error creating new user");
   }
 
-  return res
-    .cookie("refreshToken", refreshToken, options)
-    .cookie("accessToken", accessToken, options)
-    .json("user created succesfully");
+  res
+  .cookie("refreshToken", refreshToken, options)
+  .cookie("accessToken", accessToken, options)
+
+  res
+  .send(user)
+    
 });
 
 const loginTenant = asyncHandler(async (req, res) => {
@@ -70,7 +75,7 @@ const loginTenant = asyncHandler(async (req, res) => {
     throw new ApiError(400, "email or phone number is required");
   }
 
-  const user = await findUserByEmailOrPhone(email, phone);
+  const user = await findTenantByEmailOrPhone(email, phone);
 
   if (!user) {
     throw new ApiError(404, "user not found");
@@ -90,20 +95,28 @@ const loginTenant = asyncHandler(async (req, res) => {
   const refreshToken = await generateRefreshToken(user);
 
   res
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json("User logged in successfully");
+  .cookie("accessToken", accessToken, options)
+  .cookie("refreshToken", refreshToken, options)
+  
+  res.send(user)
 });
 
 //secured controllers
 
-const logoutTenant = asyncHandler(async (req, res) => {
+const logoutUser = asyncHandler(async (req, res) => {
+
   res.clearCookie("accessToken", options)
   res.clearCookie("refreshToken", options)
 
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "User logged out!"))
+})
+
+const getTenant = asyncHandler(async(req, res) => {
+  res.send({
+    user: req.user
+  })
 })
 
 const deleteTenant = asyncHandler(async (req, res) => {
@@ -126,12 +139,6 @@ const deleteTenant = asyncHandler(async (req, res) => {
     throw new ApiError(400, "invalid password")
   }
 
-  await prisma.property.deleteMany({
-    where: {
-      tenantId: req.user.id
-    }
-  })
-
   await prisma.tenant.delete({
     where: {
       id: req.user.id
@@ -147,6 +154,7 @@ const deleteTenant = asyncHandler(async (req, res) => {
 export {
     registerTenant,
     loginTenant,
-    logoutTenant,
-    deleteTenant
+    logoutUser,
+    deleteTenant,
+    getTenant
 }

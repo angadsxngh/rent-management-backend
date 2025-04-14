@@ -25,16 +25,15 @@ model Owner {
 }
 
 model Tenant {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
   name       String
-  email      String    @unique
+  email      String     @unique
   phone      String
   password   String
-  rentDue    Float
-  property   Property? @relation(fields: [propertyId], references: [id])
-  propertyId String?   @unique
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  rentDue    Float      @default(0)
+  properties Property[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
 model Property {
@@ -47,7 +46,8 @@ model Property {
   size       Int
   owner      Owner    @relation(fields: [ownerId], references: [id])
   ownerId    String
-  tenant     Tenant?
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  tenantId   String?  @db.ObjectId
 }

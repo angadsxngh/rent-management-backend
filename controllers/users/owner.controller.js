@@ -7,13 +7,15 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../services/user.services.js";
-import { findUserByEmailOrPhone } from "../../services/user.services.js";
+import { findOwnerByEmailOrPhone } from "../../services/user.services.js";
 
 const prisma = new PrismaClient();
 
 const options = {
   httpOnly: true,
-  secure: true,
+    secure: true,
+    sameSite: 'None',
+    path: '/'
 };
 
 const registerOwner = asyncHandler(async (req, res) => {
@@ -57,10 +59,12 @@ const registerOwner = asyncHandler(async (req, res) => {
     throw new ApiError(400, "error creating new user");
   }
 
-  return res
-    .cookie("refreshToken", refreshToken, options)
-    .cookie("accessToken", accessToken, options)
-    .json("user created succesfully");
+  res
+  .cookie("refreshToken", refreshToken, options)
+  .cookie("accessToken", accessToken, options)
+  
+  res.send(user)
+  
 });
 
 const loginOwner = asyncHandler(async (req, res) => {
@@ -70,7 +74,7 @@ const loginOwner = asyncHandler(async (req, res) => {
     throw new ApiError(400, "email or phone number is required");
   }
 
-  const user = await findUserByEmailOrPhone(email, phone);
+  const user = await findOwnerByEmailOrPhone(email, phone);
 
   if (!user) {
     throw new ApiError(404, "user not found");
@@ -90,14 +94,26 @@ const loginOwner = asyncHandler(async (req, res) => {
   const refreshToken = await generateRefreshToken(user);
 
   res
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json("User logged in successfully");
+  .status(200)
+  .cookie("accessToken", accessToken, options)
+  .cookie("refreshToken", refreshToken, options)
+    
+  res.send({
+    user: user
+  })
 });
 
 //secured controllers
 
+const getOwner = asyncHandler(async(req, res) => {
+  res.send({
+    user: req.user
+  })
+})
+
 const logoutOwner = asyncHandler(async (req, res) => {
+
+
   res.clearCookie("accessToken", options)
   res.clearCookie("refreshToken", options)
 
@@ -138,6 +154,7 @@ const deleteOwner = asyncHandler(async (req, res) => {
     }
   })
 
+
   res
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
@@ -148,5 +165,6 @@ export {
   registerOwner,
   loginOwner,
   logoutOwner,
-  deleteOwner
+  deleteOwner,
+  getOwner
 };

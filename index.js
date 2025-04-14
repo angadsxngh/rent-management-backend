@@ -3,6 +3,7 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import ownerRouter from './routes/owner routes/owner.routes.js'
+import tenantRouter from './routes/tenant routes/tenant.routes.js'
 
 const app = express()
 
@@ -23,3 +24,4 @@ app.listen(3000, () => {
 })
 
 app.use('/api/v1/owners', ownerRouter)
+app.use('/api/v1/tenants', tenantRouter)

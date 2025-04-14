@@ -17,14 +17,22 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    const user = await prisma.owner.findFirst({
+    let user = await prisma.owner.findFirst({
       where: {
         id: decodedToken.id,
       },
     });
 
     if (!user) {
-      throw new ApiError(401, "Invalid access token");
+      user = await prisma.tenant.findFirst({
+        where: {
+          id: decodedToken.id,
+        },
+      });
+    }
+
+    if(!user){
+      throw new ApiError(400, "Invalid access token")
     }
 
     req.user = user;
