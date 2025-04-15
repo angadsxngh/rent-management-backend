@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const createProperty = asyncHandler(async (req, res) => {
     const userId = req.user.id
 
-    const { address, city, country, rentAmount, size } = req.body
+    const { address, city, country, rentAmount, size, state, type } = req.body
 
 
     const mediaLocalPath = req.files?.imageUrl?.[0]?.path
@@ -39,7 +39,9 @@ const createProperty = asyncHandler(async (req, res) => {
             size: parseInt(size),
             ownerId: userId,
             city: city,
-            country: country
+            country: country,
+            state: state,
+            type: type
         }
     })
 
@@ -53,7 +55,7 @@ const createProperty = asyncHandler(async (req, res) => {
 
 })
 
-const getProperties = asyncHandler(async (req, res) => {z
+const getProperties = asyncHandler(async (req, res) => {
 
     const userId = req.user.id;
 
@@ -66,9 +68,9 @@ const getProperties = asyncHandler(async (req, res) => {z
     console.log(properties)
 
     res
-        .status(200)
-        .send(properties)
-        .json("Properties fetches successfully")
+    .status(200)
+    .send(properties)
+    
 })
 
 const getUserProperties = asyncHandler(async (req, res) => {
@@ -157,8 +159,8 @@ const deleteProperty = asyncHandler(async (req, res) => {
         })
 
         res
-            .status(200)
-            .json("Property deleted successfully")
+        .status(200)
+        .send()
     } catch (error) {
         throw new ApiError(400, "An error occured while deleting the post")
     }

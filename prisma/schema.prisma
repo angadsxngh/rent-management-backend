@@ -42,7 +42,9 @@ model Property {
   city       String
   country    String
   rentAmount Float
+  state      String
   imageUrl   String
+  type       String
   size       Int
   owner      Owner    @relation(fields: [ownerId], references: [id])
   ownerId    String
