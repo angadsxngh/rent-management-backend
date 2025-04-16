@@ -19,9 +19,11 @@ model Owner {
   email      String     @unique
   phone      String
   password   String
+  isOwner    Boolean?   @default(true)
   properties Property[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+  Request    Request[]
 }
 
 model Tenant {
@@ -29,15 +31,17 @@ model Tenant {
   name       String
   email      String     @unique
   phone      String
+  isOwner    Boolean?   @default(false)
   password   String
   rentDue    Float      @default(0)
   properties Property[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+  Request    Request[]
 }
 
 model Property {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
   address    String
   city       String
   country    String
@@ -46,10 +50,24 @@ model Property {
   imageUrl   String
   type       String
   size       Int
+  owner      Owner     @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tenantId   String?   @db.ObjectId
+  Request    Request[]
+}
+
+model Request {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  status     String   @default("pending")
   owner      Owner    @relation(fields: [ownerId], references: [id])
   ownerId    String
-  tenant     Tenant?  @relation(fields: [tenantId], references: [id])
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId   String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  tenantId   String?  @db.ObjectId
 }

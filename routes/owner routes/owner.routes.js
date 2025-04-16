@@ -4,6 +4,7 @@ import {verifyJWT} from '../../middleware/auth.middleware.js'
 import { logoutUser } from "../../controllers/users/tenant.controller.js";
 import {createProperty, deleteProperty, findProperty, getProperties, getUserProperties} from "../../controllers/property/property.controller.js"
 import { upload } from "../../middleware/multer.middleware.js";
+import { acceptRequest, getRequests } from "../../controllers/request/request.controller.js";
 
 const router = new Router()
 
@@ -13,8 +14,9 @@ router.route('/login').post(loginOwner)
 
 //secured routes
 
-router.route('/add-property')
-    .post(upload.fields([
+//properties
+
+router.route('/add-property').post(upload.fields([
     {
         name:"imageUrl",
         maxCount: 1
@@ -29,14 +31,23 @@ router.route('/properties/:userId').get(verifyJWT, getUserProperties)
 
 router.route('/find-property/:city').get(verifyJWT, findProperty)
 
-router.route('/logout').post(verifyJWT, logoutUser)
-
 router.route('/add-property').post(verifyJWT, createProperty)
 
 router.route('/delete-property').post(verifyJWT, deleteProperty)
 
-router.route('/get-user').get(verifyJWT, getOwner)
+//account
 
 router.route('/delete-account').post(verifyJWT, deleteOwner)
+
+router.route('/get-user').get(verifyJWT, getOwner)
+
+router.route('/logout').post(verifyJWT, logoutUser)
+
+//requests
+
+router.route('/get-requests').get(verifyJWT, getRequests)
+
+router.route('/accept-request/:propertyId').post(verifyJWT, acceptRequest)
+
 
 export default router
