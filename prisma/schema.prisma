@@ -47,6 +47,7 @@ model Property {
   country    String
   rentAmount Float
   state      String
+  isRented   Boolean   @default(false)
   imageUrl   String
   type       String
   size       Int
@@ -56,18 +57,20 @@ model Property {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   tenantId   String?   @db.ObjectId
+  tenantName String?
   Request    Request[]
 }
 
 model Request {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  status     String   @default("pending")
-  owner      Owner    @relation(fields: [ownerId], references: [id])
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  status     String    @default("pending")
+  owner      Owner     @relation(fields: [ownerId], references: [id])
   ownerId    String
-  property   Property @relation(fields: [propertyId], references: [id])
+  property   Property  @relation(fields: [propertyId], references: [id])
   propertyId String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
   tenantId   String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  acceptedAt DateTime?
 }

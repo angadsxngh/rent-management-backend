@@ -146,6 +146,7 @@ const findProperty = asyncHandler(async (req, res) => {
         city: { contains: city, mode: "insensitive" },
         state: { contains: state, mode: "insensitive" },
         country: { contains: country, mode: "insensitive" },
+        isRented: false,
       },
       select: {
         id: true,
@@ -156,6 +157,7 @@ const findProperty = asyncHandler(async (req, res) => {
         imageUrl: true,
         rentAmount: true,
         size: true,
+        tenantId: true
       },
     });
 
@@ -183,6 +185,29 @@ const deleteProperty = asyncHandler(async (req, res) => {
   }
 });
 
+const tenantProperties = asyncHandler(async(req, res) => {
+  const userId = req.user.id;
+
+  const properties = await prisma.property.findMany({
+    where:{
+      tenantId: userId
+    }
+  })
+
+  console.log(properties)
+
+  res
+  .status(200)
+  .send(properties)
+})
+
+const properties = await prisma.property.findMany({
+  where: {
+    tenantId: null,
+  },
+});
+console.log(properties);
+
 export {
   createProperty,
   getProperties,
@@ -190,4 +215,5 @@ export {
   getProperty,
   findProperty,
   deleteProperty,
+  tenantProperties
 };

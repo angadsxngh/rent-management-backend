@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {verifyJWT} from '../../middleware/auth.middleware.js'
 import { deleteTenant, getTenant, loginTenant, logoutUser, registerTenant } from "../../controllers/users/tenant.controller.js";
-import { findProperty, getProperty } from "../../controllers/property/property.controller.js";
-import { createRequest } from "../../controllers/request/request.controller.js";
+import { findProperty, getProperty, tenantProperties } from "../../controllers/property/property.controller.js";
+import { createRequest, getAlerts } from "../../controllers/request/request.controller.js";
 
 
 const router = new Router();
@@ -25,10 +25,13 @@ router.route('/find-property/:city').get(verifyJWT, findProperty)
 
 router.route('/property/:id').get(verifyJWT, getProperty)
 
+router.route('/properties').get(verifyJWT, tenantProperties)
+
 //requests
 
 router.route('/create-request/:id').post(verifyJWT, createRequest)
 
+router.route('/get-alerts').get(verifyJWT, getAlerts)
 
 
 export default router
