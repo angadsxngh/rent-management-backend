@@ -71,12 +71,11 @@ const getRequests = asyncHandler(async (req, res) => {
     },
   });
 
-  console.log(requests);
   res.status(200).send(requests);
 });
 
 const acceptRequest = asyncHandler(async (req, res) => {
-  const { userId } = req.user.id;
+  const userId  = req.user.id;
   const { propertyId } = req.params;
   const { tenantId, tenantName } = req.query;
   await prisma.property.update({
@@ -113,6 +112,25 @@ const acceptRequest = asyncHandler(async (req, res) => {
 
   res.status(200).json("Assigned successfully");
 });
+
+const deleteRequest = asyncHandler(async (req, res) => {
+  const  userId  = req.user.id;
+  const { propertyId } = req.params;
+  const { tenantId, tenantName } = req.query;
+  console.log("userId: ",userId)
+
+  await prisma.request.updateMany({
+    where: {
+      ownerId: userId,
+      propertyId: propertyId,
+      tenantId: tenantId
+    },
+    data:{
+      status: "rejected"
+    }
+  })
+  res.status(200).json("Rejected successfully");
+})
 
 const getAlerts = asyncHandler(async (req, res) => {
   const userId = req.user.id;
@@ -151,4 +169,9 @@ const getAlerts = asyncHandler(async (req, res) => {
   .send(alerts)
 });
 
-export { createRequest, getRequests, acceptRequest, getAlerts };
+export { 
+  createRequest,
+  getRequests, 
+  acceptRequest, 
+  getAlerts, 
+  deleteRequest };

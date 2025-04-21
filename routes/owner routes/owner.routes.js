@@ -4,7 +4,7 @@ import {verifyJWT} from '../../middleware/auth.middleware.js'
 import { logoutUser } from "../../controllers/users/tenant.controller.js";
 import {createProperty, deleteProperty, findProperty, getProperties, getUserProperties} from "../../controllers/property/property.controller.js"
 import { upload } from "../../middleware/multer.middleware.js";
-import { acceptRequest, getRequests } from "../../controllers/request/request.controller.js";
+import { acceptRequest, deleteRequest, getRequests } from "../../controllers/request/request.controller.js";
 
 const router = new Router()
 
@@ -48,6 +48,8 @@ router.route('/logout').post(verifyJWT, logoutUser)
 router.route('/get-requests').get(verifyJWT, getRequests)
 
 router.route('/accept-request/:propertyId').post(verifyJWT, acceptRequest)
+
+router.route('/delete-request/:propertyId').post(verifyJWT, deleteRequest)
 
 
 export default router
