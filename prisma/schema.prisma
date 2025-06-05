@@ -14,51 +14,59 @@ datasource db {
 }
 
 model Owner {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  email      String     @unique
-  phone      String
-  password   String
-  isOwner    Boolean?   @default(true)
-  properties Property[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  Request    Request[]
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String           @unique
+  phone          String
+  password       String
+  isOwner        Boolean?         @default(true)
+  properties     Property[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  Request        Request[]
+  Payment        Payment[]
+  PaymentRequest PaymentRequest[]
 }
 
 model Tenant {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  email      String     @unique
-  phone      String
-  isOwner    Boolean?   @default(false)
-  password   String
-  rentDue    Float      @default(0)
-  properties Property[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  Request    Request[]
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String           @unique
+  phone          String
+  isOwner        Boolean?         @default(false)
+  password       String
+  rentDue        Float            @default(0)
+  properties     Property[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  Request        Request[]
+  Payment        Payment[]
+  PaymentRequest PaymentRequest[]
 }
 
 model Property {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  address    String
-  city       String
-  country    String
-  rentAmount Float
-  state      String
-  isRented   Boolean   @default(false)
-  imageUrl   String
-  type       String
-  size       Int
-  owner      Owner     @relation(fields: [ownerId], references: [id])
-  ownerId    String
-  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  tenantId   String?   @db.ObjectId
-  tenantName String?
-  Request    Request[]
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  address        String
+  city           String
+  country        String
+  rentAmount     Float
+  state          String
+  isRented       Boolean          @default(false)
+  imageUrl       String
+  type           String
+  size           Int
+  owner          Owner            @relation(fields: [ownerId], references: [id])
+  ownerId        String
+  tenant         Tenant?          @relation(fields: [tenantId], references: [id])
+  tenantId       String?          @db.ObjectId
+  tenantName     String?
+  assignedAt     DateTime?
+  balance        Float            @default(0)
+  Request        Request[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  Payment        Payment[]
+  PaymentRequest PaymentRequest[]
 }
 
 model Request {
@@ -72,5 +80,35 @@ model Request {
   tenantId   String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  acceptedAt DateTime?2
+  acceptedAt DateTime?
+}
+
+model Payment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String
+  amount     Float
+  date       DateTime
+  property   Property @relation(fields: [propertyId], references: [id])
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId   String
+  owner      Owner    @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  note       String?
+  address    String
+  mode       String   @default("cash")
+}
+
+model PaymentRequest {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  owner      Owner     @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  property   Property  @relation(fields: [propertyId], references: [id])
+  propertyId String
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  tenantId   String
+  amount     Float
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  acceptedAt DateTime?
+  status     String?   @default("pending")
 }

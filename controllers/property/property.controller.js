@@ -157,7 +157,7 @@ const findProperty = asyncHandler(async (req, res) => {
         imageUrl: true,
         rentAmount: true,
         size: true,
-        tenantId: true
+        tenantId: true,
       },
     });
 
@@ -185,28 +185,76 @@ const deleteProperty = asyncHandler(async (req, res) => {
   }
 });
 
-const tenantProperties = asyncHandler(async(req, res) => {
+const tenantProperties = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
   const properties = await prisma.property.findMany({
-    where:{
-      tenantId: userId
-    }
-  })
+    where: {
+      tenantId: userId,
+    },
+  });
 
-  console.log(properties)
+  console.log(properties);
+
+  res.status(200).send(properties);
+});
+
+const calculateBalances = asyncHandler(async (req, res) => {
+  const ownerId = req.user.id
+  const properties = await prisma.property.findMany({
+    where: { 
+      ownerId: ownerId
+     },
+    select: { balance: true },
+  });
+
+  const totalBalance = properties.reduce((sum, prop) => sum + prop.balance, 0);
+  return res
+  .status(200)
+  .json(totalBalance)
+});
+
+const clearBalance = asyncHandler(async (req, res) => {
+  const ownerId = req.user.id;
+  const { propertyId } = req.params;
+  const { amount, note, tenantId, mode } = req.body;
+
+  const updatedProperty = await prisma.property.update({
+    where: {
+      id: propertyId,
+    },
+    data: {
+      balance: {
+        decrement: amount
+      }
+    },
+    select:{
+      address: true
+    }
+  });
+
+  await prisma.payment.create({
+    data: {
+      propertyId: propertyId,
+      amount,
+      note,
+      date: new Date(),
+      ownerId: ownerId,
+      tenantId: tenantId,
+      address: updatedProperty.address,
+      mode: mode
+    },
+  });
 
   res
   .status(200)
-  .send(properties)
-})
-
-const properties = await prisma.property.findMany({
-  where: {
-    tenantId: null,
-  },
+  .json({
+    message: "Balance updated successfully",
+    property: updatedProperty,
+  });
 });
-console.log(properties);
+
+
 
 export {
   createProperty,
@@ -215,5 +263,7 @@ export {
   getProperty,
   findProperty,
   deleteProperty,
-  tenantProperties
+  tenantProperties,
+  calculateBalances,
+  clearBalance
 };

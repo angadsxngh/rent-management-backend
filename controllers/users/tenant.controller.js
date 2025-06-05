@@ -119,6 +119,29 @@ const getTenant = asyncHandler(async(req, res) => {
   })
 })
 
+const getTenantTransactions = asyncHandler(async (req, res) => {
+  const tenantId = req.user.id
+
+  const transactions = await prisma.payment.findMany({
+    where:{
+      tenantId: tenantId
+    },
+    select:{
+      owner:true,
+      address:true,
+      amount:true,
+      mode:true,
+      note:true,
+      date:true,
+    },
+    orderBy: { date: "desc" }
+  })
+
+  return res
+  .status(200)
+  .json(transactions)
+})
+
 const deleteTenant = asyncHandler(async (req, res) => {
 
   const { password } = req.body;
@@ -156,5 +179,6 @@ export {
     loginTenant,
     logoutUser,
     deleteTenant,
+    getTenantTransactions,
     getTenant
 }

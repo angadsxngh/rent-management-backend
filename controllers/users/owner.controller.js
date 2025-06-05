@@ -13,9 +13,9 @@ const prisma = new PrismaClient();
 
 const options = {
   httpOnly: true,
-    secure: true,
-    sameSite: 'None',
-    path: '/'
+  secure: true,
+  sameSite: "None",
+  path: "/",
 };
 
 const registerOwner = asyncHandler(async (req, res) => {
@@ -60,11 +60,10 @@ const registerOwner = asyncHandler(async (req, res) => {
   }
 
   res
-  .cookie("refreshToken", refreshToken, options)
-  .cookie("accessToken", accessToken, options)
-  
-  res.send(user)
-  
+    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, options);
+
+  res.send(user);
 });
 
 const loginOwner = asyncHandler(async (req, res) => {
@@ -94,77 +93,80 @@ const loginOwner = asyncHandler(async (req, res) => {
   const refreshToken = await generateRefreshToken(user);
 
   res
-  .status(200)
-  .cookie("accessToken", accessToken, options)
-  .cookie("refreshToken", refreshToken, options)
-    
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options);
+
   res.send({
-    user: user
-  })
+    user: user,
+  });
 });
 
 //secured controllers
 
-const getOwner = asyncHandler(async(req, res) => {
+const getOwner = asyncHandler(async (req, res) => {
   res.send({
-    user: req.user
-  })
-})
+    user: req.user,
+  });
+});
 
 const logoutOwner = asyncHandler(async (req, res) => {
+  res.clearCookie("accessToken", options);
+  res.clearCookie("refreshToken", options);
 
+  return res.status(200).json(new ApiResponse(200, {}, "User logged out!"));
+});
 
-  res.clearCookie("accessToken", options)
-  res.clearCookie("refreshToken", options)
+const getTransactions = asyncHandler(async (req, res) => {
+  const ownerId = req.user.id
+
+  const transactions = await prisma.payment.findMany({
+    where:{
+      ownerId: ownerId
+    },
+    orderBy: { date: "desc" }
+  })
 
   return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "User logged out!"))
+  .status(200)
+  .json(transactions)
 })
 
 const deleteOwner = asyncHandler(async (req, res) => {
-
   const { password } = req.body;
 
   const user = await prisma.owner.findFirst({
     where: {
-      id: req.user.id
-    }
-  })
+      id: req.user.id,
+    },
+  });
 
   if (!password) {
-    throw new ApiError(400, "password field cannot be empty")
+    throw new ApiError(400, "password field cannot be empty");
   }
 
-  const isPasswordValid = bcrypt.compare(password, user.password)
+  const isPasswordValid = bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    throw new ApiError(400, "invalid password")
+    throw new ApiError(400, "invalid password");
   }
 
   await prisma.property.deleteMany({
     where: {
-      ownerId: req.user.id
-    }
-  })
+      ownerId: req.user.id,
+    },
+  });
 
   await prisma.owner.delete({
     where: {
-      id: req.user.id
-    }
-  })
-
+      id: req.user.id,
+    },
+  });
 
   res
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json("Account deleted succesfully")
-})
+    .json("Account deleted succesfully");
+});
 
-export {
-  registerOwner,
-  loginOwner,
-  logoutOwner,
-  deleteOwner,
-  getOwner
-};
+export { registerOwner, loginOwner, logoutOwner, deleteOwner, getOwner, getTransactions };
