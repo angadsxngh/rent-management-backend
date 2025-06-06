@@ -4,8 +4,10 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import ownerRouter from './routes/owner routes/owner.routes.js'
 import tenantRouter from './routes/tenant routes/tenant.routes.js'
+import { startCron } from './services/cron.services.js'
 
 const app = express()
+startCron()
 
 app.use(cors({
     origin: "*",
@@ -16,6 +18,8 @@ app.use(express.urlencoded({extended: true, limit: '16kb'}))
 app.use(express.static('public'))
 app.use(cookieParser())
 app.use(bodyParser.json())
+
+
 
 const PORT = process.env.PORT || 3000;
 
