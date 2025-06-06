@@ -67,5 +67,5 @@ export function startCron(){
     deleteRequests().catch(console.error);
 
   cron.schedule('0 0 * * *', () => updateMonthlyBalances());
-  cron.schedule('* * * * *', () => deleteRequests())
+  cron.schedule('0 0 * * *', () => deleteRequests())
 }
