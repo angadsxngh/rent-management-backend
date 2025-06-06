@@ -74,36 +74,37 @@ model Request {
   status     String    @default("pending")
   owner      Owner     @relation(fields: [ownerId], references: [id])
   ownerId    String
-  property   Property  @relation(fields: [propertyId], references: [id])
-  propertyId String
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
   tenant     Tenant    @relation(fields: [tenantId], references: [id])
   tenantId   String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   acceptedAt DateTime?
+  type       String    @default("acceptance-request")
 }
 
 model Payment {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  propertyId String
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String?
   amount     Float
   date       DateTime
-  property   Property @relation(fields: [propertyId], references: [id])
-  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
   tenantId   String
-  owner      Owner    @relation(fields: [ownerId], references: [id])
+  owner      Owner     @relation(fields: [ownerId], references: [id])
   ownerId    String
   note       String?
   address    String
-  mode       String   @default("cash")
+  mode       String    @default("cash")
 }
 
 model PaymentRequest {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   owner      Owner     @relation(fields: [ownerId], references: [id])
   ownerId    String
-  property   Property  @relation(fields: [propertyId], references: [id])
-  propertyId String
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
   tenant     Tenant    @relation(fields: [tenantId], references: [id])
   tenantId   String
   amount     Float
@@ -111,4 +112,7 @@ model PaymentRequest {
   updatedAt  DateTime  @updatedAt
   acceptedAt DateTime?
   status     String?   @default("pending")
+  type       String    @default("payment-request")
+  mode       String    @default("Other")
+  note       String?
 }

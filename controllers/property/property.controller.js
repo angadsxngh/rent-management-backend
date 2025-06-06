@@ -173,15 +173,43 @@ const deleteProperty = asyncHandler(async (req, res) => {
   const { propertyId } = req.body;
 
   try {
+
+    await prisma.payment.updateMany({
+      where:{
+        propertyId: propertyId
+      }, 
+      data:{
+        propertyId: null
+      }
+    })
+    await prisma.paymentRequest.updateMany({
+      where:{
+        propertyId: propertyId
+      }, 
+      data:{
+        propertyId: null
+      }
+    })
+    await prisma.request.updateMany({
+      where:{
+        propertyId: propertyId
+      }, 
+      data:{
+        propertyId: null
+      }
+    })
+
     await prisma.property.delete({
       where: {
         id: propertyId,
       },
     });
 
-    res.status(200).send();
+    res
+    .status(200)
+    .json("property deleted");
   } catch (error) {
-    throw new ApiError(400, "An error occured while deleting the post");
+    console.log(error)
   }
 });
 

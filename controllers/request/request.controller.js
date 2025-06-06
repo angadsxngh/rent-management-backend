@@ -187,7 +187,8 @@ const acceptRequest = asyncHandler(async (req, res) => {
 const acceptPaymentRequest = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { propertyId } = req.params;
-  const amount = parseFloat(req.query.amount); // ensure it's a number
+  const {id} = req.query
+  const {amount} = req.body;
 
   const updatedProperty = await prisma.property.update({
     where: {
@@ -197,9 +198,35 @@ const acceptPaymentRequest = asyncHandler(async (req, res) => {
       balance: {
         decrement: amount,
       },
-      status: "Accepted",
     },
+    select:{
+      tenantId: true,
+      address: true
+    }
   });
+
+  await prisma.paymentRequest.update({
+    where:{
+      id: id
+    },
+    data:{
+      status: "accepted",
+      acceptedAt: new Date()
+    }
+
+  })
+  
+  await prisma.payment.create({
+    data:{
+      propertyId: propertyId,
+      amount: amount,
+      date: new Date(),
+      tenantId: updatedProperty.tenantId,
+      ownerId: userId,
+      address: updatedProperty.address,
+      mode: "Other"
+    }
+  })
 
   return res.status(200).json(updatedProperty);
 });
@@ -221,8 +248,22 @@ const deleteRequest = asyncHandler(async (req, res) => {
       status: "rejected",
     },
   });
-  res.status(200).json("Rejected successfully");
+  return res.status(200).json("Rejected successfully");
 });
+
+const deletePaymentRequest = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+
+  await prisma.paymentRequest.update({
+    where:{
+      id: requestId
+    }, data:{
+      status: "rejected"
+    }
+  })
+
+  return res.status(200).json("rejected successfully")
+})
 
 const getAlerts = asyncHandler(async (req, res) => {
   const userId = req.user.id;
@@ -302,5 +343,6 @@ export {
   getAlerts,
   deleteRequest,
   createPaymentRequest,
-  acceptPaymentRequest
+  acceptPaymentRequest,
+  deletePaymentRequest
 };

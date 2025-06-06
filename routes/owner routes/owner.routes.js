@@ -4,7 +4,7 @@ import {verifyJWT} from '../../middleware/auth.middleware.js'
 import { logoutUser } from "../../controllers/users/tenant.controller.js";
 import {calculateBalances, clearBalance, createProperty, deleteProperty, findProperty, getProperties, getUserProperties} from "../../controllers/property/property.controller.js"
 import { upload } from "../../middleware/multer.middleware.js";
-import { acceptPaymentRequest, acceptRequest, deleteRequest, getRequests } from "../../controllers/request/request.controller.js";
+import { acceptPaymentRequest, acceptRequest, deletePaymentRequest, deleteRequest, getRequests } from "../../controllers/request/request.controller.js";
 
 const router = new Router()
 
@@ -58,6 +58,8 @@ router.route('/accept-request/:propertyId').post(verifyJWT, acceptRequest)
 router.route('/delete-request/:propertyId').post(verifyJWT, deleteRequest)
 
 router.route('/accept-payment/:propertyId').post(verifyJWT, acceptPaymentRequest)
+
+router.route('/reject-payment/:requestId').post(verifyJWT, deletePaymentRequest)
 
 
 export default router
