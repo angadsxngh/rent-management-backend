@@ -10,7 +10,7 @@ const app = express()
 startCron()
 
 app.use(cors({
-    origin: ["http://localhost:5173", "https://go-rentease.vercel.app/login"],
+    origin: ["http://localhost:5173", "https://go-rentease.vercel.app"],
     credentials: true,
 }))
 app.use(express.json({limit: "16kb"}))
